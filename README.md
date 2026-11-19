@@ -36,7 +36,7 @@ Run this from a trusted local shell after configuring DATABASE_URL: python backe
 - POST /api/footprint/estimate.
 
 ## Retrieval evaluation and measured metrics
-The fixed, hand-labelled query set is backend/evaluation/rag_queries.json. CI currently reports Recall@5 = 0.9375, MRR = 0.7188 and nDCG@5 = 0.7599 over 8 queries for the hybrid retriever. These are reproducible offline ranking metrics on a small benchmark, not production user outcomes. The CI benchmark also measures in-process retrieval latency on the GitHub Actions runner; runtime varies and it excludes network, database and LLM time. Check the workflow log for the latest run's measurements.
+The fixed, hand-labelled query set is backend/evaluation/rag_queries.json. CI currently reports Recall@5 = 0.9375, MRR = 0.7812 and nDCG@5 = 0.8061 over 8 queries for the hybrid retriever. These are reproducible offline ranking metrics on a small benchmark, not production user outcomes. The CI benchmark also measured 80 in-process retrieval calls on a GitHub Actions runner: median 2.490 ms, p95 2.592 ms and mean 2.519 ms in the recorded run. These are runner-specific and exclude network, database and LLM time.
 
 ## Environmental data provenance
 backend/app/data/environmental_sources.json records publishers and reports. backend/app/data/environmental_datasets.json lists eight environmental indicators with source pages, CSV/API download endpoints, units, coverage and interpretation caveats. It is a discovery registry: raw datasets are not downloaded, cached or normalized into the application database yet. Before publishing analyses, fetch the underlying data, pin a version/date, retain source metadata and validate indicator definitions and licenses.
