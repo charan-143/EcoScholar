@@ -10,6 +10,8 @@ router = APIRouter(prefix="/api")
 QUIZZES = {
  "climate-basics": {"questions": ["Which action is mitigation?", "What does adaptation primarily do?", "What drives recent human-caused warming?"], "answers": [1, 0, 2], "options": [["Build flood barriers", "Reduce fossil fuel emissions", "Move homes"], ["Reduce harm from impacts", "Increase emissions", "Measure daily weather"], ["Solar cycles alone", "Ocean tides", "Increasing greenhouse gases"]]},
  "clean-energy": {"questions": ["Why is grid flexibility important?", "What should lifecycle comparisons use?"], "answers": [1, 0], "options": [["To eliminate all transmission", "To balance variable supply and demand", "To avoid maintenance"], ["Consistent boundaries and functional units", "Different units for each option", "Only purchase price"]]},
+ "biodiversity": {"questions": ["Which is a major direct pressure on biodiversity?", "Which action supports ecosystem recovery?"], "answers": [1, 2], "options": [["More habitat connectivity", "Habitat conversion", "Ecological restoration"], ["Unmanaged fragmentation", "Overexploitation", "Native habitat restoration"]]},
+ "circular-economy": {"questions": ["Which option generally preserves the most product value?", "What is circular design concerned with?"], "answers": [0, 2], "options": [["Preventing waste and extending product life", "Disposal after one use", "Downcycling by default"], ["Only packaging colour", "Maximizing planned obsolescence", "Durability, repairability and reuse"]]},
 }
 
 @router.get("/health")
@@ -36,6 +38,8 @@ def submit_quiz(payload: QuizRequest, db: Session = Depends(get_db)):
     quiz = QUIZZES.get(payload.course_slug)
     if not quiz: raise HTTPException(404, "No quiz is available for this course yet")
     if len(payload.answers) != len(quiz["answers"]): raise HTTPException(422, "Answer count does not match quiz")
+    if any(answer < 0 or answer >= len(options) for answer, options in zip(payload.answers, quiz["options"])):
+        raise HTTPException(422, "Answer option is out of range")
     score = sum(a == b for a,b in zip(payload.answers, quiz["answers"]))
     db.add(QuizAttempt(course_slug=payload.course_slug, score=score, total=len(quiz["answers"])))
     db.commit()
