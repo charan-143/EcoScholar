@@ -30,7 +30,7 @@ export default function CoursePage(){
  async function submit(){
   setError('');
   try{
-   const response=await fetch(`${API}/api/quizzes/submit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({course_slug:params.slug,answers})});
+   const token=localStorage.getItem('ecoscholar_token');\n   const headers:Record<string,string>={'Content-Type':'application/json'};\n   if(token)headers.Authorization=`Bearer ${token}`;\n   const response=await fetch(`${API}/api/quizzes/submit`,{method:'POST',headers,body:JSON.stringify({course_slug:params.slug,answers})});
    const data=await response.json();
    if(!response.ok)throw new Error(data.detail||'Quiz submission failed');
    setResult(data);
