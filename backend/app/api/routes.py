@@ -23,6 +23,8 @@ def courses(db:Session=Depends(get_db)):
  return [{"slug":c.slug,"title":c.title,"category":c.category,"level":c.level,"duration":c.duration,"description":c.description,"content":c.content} for c in db.query(Course).all()]
 @router.get("/sources")
 def sources(): return {"count":len(get_source_catalog()),"sources":get_source_catalog()}
+@router.get("/datasets")
+def datasets(): return {"count":len(get_dataset_catalog()),"datasets":get_dataset_catalog()}
 @router.get("/recommendations")
 def recommendations(topic:str="climate"): return {"topic":topic,"results":personalized_recommendations(None,[],[topic])}
 @router.get("/recommendations/me")
