@@ -20,7 +20,8 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements.txt
       - run: pip install -r backend/requirements.txt
-      - run: python -m compileall -q backend/app backend/api\n      - run: DATABASE_URL=sqlite:///./ecoscholar_migration_test.db alembic upgrade head
+      - run: python -m compileall -q backend/app backend/api
+      - run: DATABASE_URL=sqlite:///./ecoscholar_migration_test.db alembic upgrade head
       - run: PYTHONPATH=backend pytest -q backend/tests
       - run: PYTHONPATH=backend python backend/evaluation/metrics.py
       - run: PYTHONPATH=backend python backend/evaluation/benchmark.py
