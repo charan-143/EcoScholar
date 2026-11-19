@@ -76,3 +76,14 @@ def update_role(user_id: int, payload: RoleUpdate, db: Session = Depends(get_db)
         raise HTTPException(status_code=400, detail="Administrators cannot demote their own account")
     user.role = payload.role; db.commit(); db.refresh(user)
     return public_user(user)
+
+def optional_user(credentials: HTTPAuthorizationCredentials | None = Depends(bearer), db: Session = Depends(get_db)):
+    if not credentials:
+        return None
+    try:
+        payload=decode_access_token(credentials.credentials)
+        user=db.get(User,int(payload["sub"]))
+    except Exception:
+        raise HTTPException(status_code=401,detail="Invalid or expired access token")
+    if not user: raise HTTPException(status_code=401,detail="Account no longer exists")
+    return user
