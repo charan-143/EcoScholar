@@ -22,7 +22,8 @@ jobs:
       - run: pip install -r backend/requirements.txt
       - run: python -m compileall -q backend/app backend/api
       - run: PYTHONPATH=backend pytest -q backend/tests
-      - run: PYTHONPATH=backend python backend/evaluation/metrics.py\n      - run: PYTHONPATH=backend python backend/evaluation/benchmark.py
+      - run: PYTHONPATH=backend python backend/evaluation/metrics.py
+      - run: PYTHONPATH=backend python backend/evaluation/benchmark.py
 
   frontend:
     runs-on: ubuntu-latest
