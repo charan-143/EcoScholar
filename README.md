@@ -32,7 +32,7 @@ Run this from a trusted local shell after configuring DATABASE_URL: python backe
 - POST /api/auth/register and POST /api/auth/login.
 - GET /api/auth/me; GET /api/auth/users and PATCH /api/auth/users/{id}/role require admin.
 - GET /api/recommendations/me?interests=climate,biodiversity requires a bearer token.
-- GET /api/health, /api/courses, /api/sources, /api/datasets.
+- GET /api/health, /api/courses, /api/sources, /api/datasets; GET /api/datasets/{dataset_id}/preview?limit=10 fetches a bounded live sample from an allowlisted provider.
 - POST /api/assistant/ask.
 - GET /api/quizzes/{course_slug}; POST /api/quizzes/submit; GET /api/progress.
 - POST /api/footprint/estimate.
