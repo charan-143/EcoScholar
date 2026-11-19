@@ -1,6 +1,6 @@
 from app.services.rag import hybrid_retrieve
 from app.services.recommendations import personalized_recommendations
-from app.evaluation.metrics import evaluate
+from evaluation.metrics import evaluate
 
 def test_retrieval_returns_ranked_citations():
     hits=hybrid_retrieve("climate change mitigation greenhouse gas emissions",5)
