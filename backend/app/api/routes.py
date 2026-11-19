@@ -9,7 +9,8 @@ from app.api.auth import current_user, optional_user
 from app.services.rag import hybrid_retrieve, answer_with_sources
 from app.services.recommendations import personalized_recommendations
 from app.data.source_catalog import get_source_catalog
-from app.data.dataset_catalog import get_dataset_catalog\nfrom app.services.dataset_preview import preview_dataset
+from app.data.dataset_catalog import get_dataset_catalog
+from app.services.dataset_preview import preview_dataset
 router=APIRouter(prefix="/api")
 QUIZZES={
 "climate-basics":{"questions":["Which action is mitigation?","What does adaptation primarily do?","What drives recent human-caused warming?"],"answers":[1,0,2],"options":[["Build flood barriers","Reduce fossil fuel emissions","Move homes"],["Reduce harm from impacts","Increase emissions","Measure daily weather"],["Solar cycles alone","Ocean tides","Increasing greenhouse gases"]]},
