@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.course import Course
@@ -9,7 +9,7 @@ from app.api.auth import current_user, optional_user
 from app.services.rag import hybrid_retrieve, answer_with_sources
 from app.services.recommendations import personalized_recommendations
 from app.data.source_catalog import get_source_catalog
-from app.data.dataset_catalog import get_dataset_catalog
+from app.data.dataset_catalog import get_dataset_catalog\nfrom app.services.dataset_preview import preview_dataset
 router=APIRouter(prefix="/api")
 QUIZZES={
 "climate-basics":{"questions":["Which action is mitigation?","What does adaptation primarily do?","What drives recent human-caused warming?"],"answers":[1,0,2],"options":[["Build flood barriers","Reduce fossil fuel emissions","Move homes"],["Reduce harm from impacts","Increase emissions","Measure daily weather"],["Solar cycles alone","Ocean tides","Increasing greenhouse gases"]]},
@@ -25,6 +25,12 @@ def courses(db:Session=Depends(get_db)):
 def sources(): return {"count":len(get_source_catalog()),"sources":get_source_catalog()}
 @router.get("/datasets")
 def datasets(): return {"count":len(get_dataset_catalog()),"datasets":get_dataset_catalog()}
+@router.get("/datasets/{dataset_id}/preview")
+def dataset_preview(dataset_id:str,limit:int=Query(10,ge=1,le=50)):
+    try: result=preview_dataset(dataset_id,limit)
+    except Exception as exc: raise HTTPException(status_code=502,detail="The upstream data provider could not be reached.") from exc
+    if result is None: raise HTTPException(status_code=404,detail="Dataset not found")
+    return result
 @router.get("/recommendations")
 def recommendations(topic:str="climate"): return {"topic":topic,"results":personalized_recommendations(None,[],[topic])}
 @router.get("/recommendations/me")
