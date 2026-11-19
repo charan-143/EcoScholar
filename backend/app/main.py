@@ -12,7 +12,7 @@ Base.metadata.create_all(bind=engine)
 with SessionLocal() as db: seed_courses(db)
 app=FastAPI(title="EcoScholar API",version="0.3.0",description="Authenticated sustainability learning with evaluated hybrid retrieval")
 allowed=[x.strip() for x in os.getenv("API_ALLOWED_ORIGINS","http://localhost:3000").split(",") if x.strip()]
-app.add_middleware(CORSMiddleware,allow_origins=allowed,allow_origin_regex=r"https://[a-zA-Z0-9-]+\\.vercel\\.app",allow_credentials=False,allow_methods=["GET","POST","PATCH","OPTIONS"],allow_headers=["Content-Type","Authorization"])
+app.add_middleware(CORSMiddleware,allow_origins=allowed,allow_origin_regex=r"https://[a-zA-Z0-9-]+\.vercel\.app",allow_credentials=False,allow_methods=["GET","POST","PATCH","OPTIONS"],allow_headers=["Content-Type","Authorization"])
 app.include_router(router)
 app.include_router(auth_router)
 @app.get("/")
