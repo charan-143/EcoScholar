@@ -52,18 +52,18 @@ def answer_with_sources(question: str, hits: list):
     else:
         return {"answer":"Relevant evidence was retrieved, but generative answering is not configured. Review the cited excerpts below; no unsupported synthesis has been generated.","sources":hits,"grounded":True,"model":"retrieval-only"}
 
-    context="\\n\\n".join(f"[{i+1}] {h['title']} | {h.get('source','')} | {h.get('url','')}\\n{h['text']}" for i,h in enumerate(hits))
+    context="\n\n".join(f"[{i+1}] {h['title']} | {h.get('source','')} | {h.get('url','')}\n{h['text']}" for i,h in enumerate(hits))
     prompt=("Answer only from the supplied evidence. If it is insufficient, say so. "
             "Cite each material factual claim inline using only the supplied citation labels [1], [2], etc. "
             "Never invent figures, publication dates, source URLs or citations. "
-            "Distinguish report findings from your own explanation and note uncertainty.\\n\\n"
-            f"Evidence:\\n{context}\\n\\nQuestion: {question}")
+            "Distinguish report findings from your own explanation and note uncertainty.\n\n"
+            f"Evidence:\n{context}\n\nQuestion: {question}")
     body=json.dumps({"model":model,"temperature":0.1,"messages":[{"role":"system","content":"You are EcoScholar, an evidence-grounded sustainability tutor. Never claim a dataset has been queried unless its supplied evidence says so."},{"role":"user","content":prompt}]}).encode()
     request=urllib.request.Request(f"{base_url.rstrip('/')}/chat/completions",data=body,headers={"Authorization":f"Bearer {api_key}","Content-Type":"application/json"})
     try:
         with urllib.request.urlopen(request,timeout=25) as response: data=json.loads(response.read())
         answer=data["choices"][0]["message"]["content"]
-        cited=[int(n) for n in re.findall(r"\\[(\\d+)\\]",answer)]
+        cited=[int(n) for n in re.findall(r"\[(\d+)\]",answer)]
         if not cited or any(n<1 or n>len(hits) for n in cited):
             raise ValueError("LLM output omitted or invented a citation identifier")
         return {"answer":answer,"sources":hits,"grounded":True,"model":f"{provider}:{model}"}
