@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 type Course = { slug:string; title:string; category:string; level:string; duration:string; description:string };
 type Source = { id:string; title:string; excerpt:string; source:string; relevance:number; url?:string };
-type Recommendation = { course_slug:string; reason:string; score:number };\ntype Dataset = {id:string;name:string;unit:string;provider:string;source_url:string;download_url:string};
+type Recommendation = { course_slug:string; reason:string; score:number };
+type Dataset = {id:string;name:string;unit:string;provider:string;source_url:string;download_url:string};
 
 export default function Home() {
   const [courses,setCourses] = useState<Course[]>([]);
@@ -14,9 +15,11 @@ export default function Home() {
   const [loading,setLoading] = useState(false);
   const [apiState,setApiState] = useState('Connecting to API');
   const [user,setUser] = useState<{display_name:string;role?:string}|null>(null);
-  const [recommendations,setRecommendations] = useState<Recommendation[]>([]);\n  const [datasets,setDatasets] = useState<Dataset[]>([]);
+  const [recommendations,setRecommendations] = useState<Recommendation[]>([]);
+  const [datasets,setDatasets] = useState<Dataset[]>([]);
   useEffect(() => {
-    fetch(`${API}/api/datasets`).then(r=>r.ok?r.json():null).then(d=>{if(d?.datasets)setDatasets(d.datasets)}).catch(()=>{});\n    fetch(`${API}/api/courses`).then(r => { if(!r.ok) throw new Error('API unavailable'); return r.json(); })
+    fetch(`${API}/api/datasets`).then(r=>r.ok?r.json():null).then(d=>{if(d?.datasets)setDatasets(d.datasets)}).catch(()=>{});
+    fetch(`${API}/api/courses`).then(r => { if(!r.ok) throw new Error('API unavailable'); return r.json(); })
       .then(d => { setCourses(d); setApiState('API connected'); }).catch(() => setApiState('API unavailable — start Docker Compose'));
     const token=localStorage.getItem('ecoscholar_token');
     const stored=localStorage.getItem('ecoscholar_user');
