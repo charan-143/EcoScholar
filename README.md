@@ -1,71 +1,65 @@
 # EcoScholar
 
-EcoScholar is a full-stack sustainability learning prototype built with Next.js, FastAPI, PostgreSQL and scikit-learn. It combines learning modules, quiz scoring, learner progress, a transparent TF-IDF retrieval baseline and an illustrative carbon-footprint estimator.
+EcoScholar is a sustainability learning platform built with Next.js, FastAPI, PostgreSQL and scikit-learn. It includes learning modules, quizzes, JWT accounts, role-based access control, hybrid retrieval, optional LLM synthesis, authoritative-source metadata and offline retrieval evaluation.
 
-## Features
-- Four seeded modules: climate, clean energy, biodiversity and circular economy.
-- Knowledge checks with server-side scoring and persisted quiz attempts.
-- Progress summary endpoint.
-- TF-IDF + cosine-similarity retrieval over an inspectable starter knowledge corpus.
-- Topic recommendations using the same retrieval baseline.
-- Carbon-footprint screening calculator with explicit placeholder-factor warnings.
-- Docker Compose development environment.
+## Capabilities
+- Four learning modules: climate, clean energy, biodiversity and circular economy.
+- Quiz scoring and progress tracking.
+- Email/password registration and login with Argon2 password hashing and signed 12-hour JWTs.
+- Learner, educator and admin roles. Self-registration always creates a learner; only admins can change roles.
+- Hybrid retrieval combining TF-IDF similarity and lexical matching.
+- Optional server-side OpenAI chat completion synthesis constrained to retrieved passages; retrieval-only fallback when no key is configured.
+- Curated metadata linking to IPCC, UNEP, IEA, IPBES, FAO, World Bank and Our World in Data.
+- Transparent personalized recommendations based on declared interests and recent quiz mastery.
+- Offline Recall@k, MRR and nDCG evaluation.
+- Illustrative footprint estimator (not a verified inventory).
 
-## Architecture
-```text
-Next.js frontend -> FastAPI REST API -> PostgreSQL
-                         |
-                  scikit-learn TF-IDF
-```
+## Local setup
+1. Copy .env.example to .env and set a long random JWT_SECRET_KEY.
+2. Run docker compose up --build.
+3. Frontend: http://localhost:3000; API docs: http://localhost:8000/docs.
+4. Backend tests: PYTHONPATH=backend pytest -q backend/tests.
+5. Retrieval metrics: PYTHONPATH=backend python backend/evaluation/metrics.py.
+6. Frontend smoke tests: cd frontend && npm test.
 
-## Run locally
-1. Install Docker Desktop / Docker Engine with Compose.
-2. Copy `.env.example` to `.env`.
-3. Run `docker compose up --build`.
-4. Open http://localhost:3000 and API docs at http://localhost:8000/docs.
+## Authentication API
+- POST /api/auth/register: email, display_name, password (minimum 10 characters).
+- POST /api/auth/login: email and password.
+- GET /api/auth/me requires Authorization: Bearer token.
+- GET /api/auth/users and PATCH /api/auth/users/{id}/role require admin.
+- GET /api/recommendations/me?interests=biodiversity,nature requires authentication.
+- Authenticated quiz submissions and progress are scoped to the signed-in learner; the legacy demo path remains available without a token.
 
-Run backend checks with `PYTHONPATH=backend pytest -q backend/tests` and compile checks with `python -m compileall -q backend/app backend/api`.
+## Evidence API
+- GET /api/health, /api/courses, /api/sources.
+- POST /api/assistant/ask with a question.
+- GET /api/quizzes/{course_slug}; POST /api/quizzes/submit; GET /api/progress.
+- POST /api/footprint/estimate.
 
-Frontend-only: `cd frontend && npm install && npm run dev`.
-Backend-only: create a Python virtual environment, install `backend/requirements.txt`, then run `uvicorn app.main:app --reload --app-dir backend` from the repository root.
+## Retrieval evaluation and genuine metrics
+The fixed query set is backend/evaluation/rag_queries.json. Run the evaluator to compute Recall@5, MRR and nDCG@5. These are reproducible offline ranking metrics on a small hand-labelled benchmark, not production user outcomes. The CI workflow runs this evaluation and prints the current metrics. Expand and independently review the benchmark and hold out test queries before making broad quality claims.
 
-## API
-- `GET /api/health`
-- `GET /api/courses`
-- `GET /api/recommendations?topic=climate`
-- `POST /api/assistant/ask` — body: `{"question":"How does climate mitigation work?"}`
-- `GET /api/quizzes/{course_slug}`
-- `POST /api/quizzes/submit` — body: `{"course_slug":"climate-basics","answers":[1,0,2]}`
-- `GET /api/progress`
-- `POST /api/footprint/estimate`
+## Data provenance
+backend/app/data/environmental_sources.json records publisher, report title, topics and authoritative URLs. The retrieval corpus contains concise editorial summaries linked to primary reports and data portals; it does not yet ingest full report tables or raw indicator downloads. Verify original report tables, definitions, dates, units, geography and scenario assumptions before citing numerical values.
 
-## Deployment layout
+## Deployment
+The public repository is configured for two Vercel projects:
+- Frontend root: frontend; set NEXT_PUBLIC_API_URL to the API origin.
+- API root: backend; set DATABASE_URL, JWT_SECRET_KEY, API_ALLOWED_ORIGINS and optionally OPENAI_API_KEY / OPENAI_MODEL.
+- Use managed PostgreSQL and allow the production frontend origin in API_ALLOWED_ORIGINS.
+- GitHub Actions runs backend compilation, backend tests, retrieval evaluation, frontend smoke tests and a Next.js production build.
 
-The repository is prepared for two Vercel projects linked to the same GitHub repository:
-- Frontend project root: `frontend` (Next.js).
-- API project root: `backend` (FastAPI Python Function via `backend/api/index.py`).
+## Security and limitations
+- Rotate the development secret and configure a high-entropy JWT_SECRET_KEY before deployment.
+- Email verification, password reset, refresh-token rotation, rate limiting, audit logs, account deletion and abuse monitoring are not implemented.
+- The frontend sign-in page stores a bearer token in localStorage; production should move to secure, HttpOnly, SameSite cookies and add CSRF protection.
+- The existing main learning UI has not yet been fully wired to attach bearer tokens to all API calls.
+- Database schema creation still uses create_all; introduce Alembic migrations and connection-pool tuning before production.
+- The footprint estimator uses illustrative constants, not localized authoritative emission factors.
+- LLM answers are optional; provider failures fall back to retrieved evidence.
 
-Configure `NEXT_PUBLIC_API_URL` on the frontend project to the deployed API origin. Configure `DATABASE_URL` and `API_ALLOWED_ORIGINS` on the API project; use a managed PostgreSQL provider with a serverless-compatible connection string. Add the frontend's production and preview origins to `API_ALLOWED_ORIGINS`. The API's CORS configuration also permits Vercel preview hostnames. Do not use the local Docker database URL in production.
-
-A GitHub Actions workflow runs Python compile/tests and a Next.js production build on pushes and pull requests to `main`.
-
-## AI/ML approach
-The assistant is a retrieval baseline, not a generative model. TF-IDF vectorization with unigram/bigram features ranks passages by cosine similarity. Retrieved excerpts and source notes are returned to the UI for inspection. This is a reproducible baseline for future comparison with embeddings, hybrid retrieval, reranking and citation-checked generation.
-
-## Limitations and responsible use
-- The knowledge corpus is a small editorial starter set. Source notes identify materials that must be verified; this is not a fully sourced environmental reference library.
-- Footprint factors are illustrative placeholders, not region-specific verified emission factors or a formal greenhouse-gas inventory.
-- Demo learner identity is static; authentication, authorization and per-user privacy controls are not implemented.
-- Database schema creation is automatic for this MVP; add Alembic migrations before production.
-- Automated test coverage, retrieval evaluation, rate limiting, observability and deployment hardening remain future work.
-- Frontend production build was not verified as part of this publication.
-
-## Roadmap
-1. Add reviewed source ingestion with provenance, dates and licensing.
-2. Build retrieval evaluation sets and compare TF-IDF, dense and hybrid retrieval.
-3. Add authentication, learner profiles and privacy controls.
-4. Replace placeholder carbon factors with localized authoritative datasets and uncertainty ranges.
-5. Add migrations, automated tests, monitoring and deployment pipelines.
+## Performance reporting
+Do not claim synthetic latency, user growth, learning gains or emissions savings as measured project outcomes. The retrieval evaluator provides actual reproducible ranking metrics. Benchmark latency/load on a named deployment and representative hardware before publishing performance numbers.
 
 ## License
 MIT
