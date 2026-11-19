@@ -13,7 +13,7 @@ export default function Home() {
   const [sources,setSources] = useState<Source[]>([]);
   const [loading,setLoading] = useState(false);
   const [apiState,setApiState] = useState('Connecting to API');
-  const [user,setUser] = useState<{display_name:string}|null>(null);
+  const [user,setUser] = useState<{display_name:string;role?:string}|null>(null);
   const [recommendations,setRecommendations] = useState<Recommendation[]>([]);
   useEffect(() => {
     fetch(`${API}/api/courses`).then(r => { if(!r.ok) throw new Error('API unavailable'); return r.json(); })
@@ -37,7 +37,7 @@ export default function Home() {
     finally { setLoading(false); }
   }
   return <main className="shell">
-    <header className="top"><a className="brand" href="/">🌱 eco<span>scholar</span></a><nav className="nav"><a href="#learning">Learning paths</a><a href="#assistant">AI assistant</a><a href="#about">About</a></nav><span className="pill">{apiState}</span>{user?<span className="pill">Hi, {user.display_name} <button onClick={()=>{localStorage.removeItem('ecoscholar_token');localStorage.removeItem('ecoscholar_user');setUser(null);setRecommendations([])}}>Sign out</button></span>:<a className="primary" href="/login">Sign in / Join</a>}</header>
+    <header className="top"><a className="brand" href="/">🌱 eco<span>scholar</span></a><nav className="nav"><a href="#learning">Learning paths</a><a href="#assistant">AI assistant</a><a href="#about">About</a></nav><span className="pill">{apiState}</span>{user?.role==="admin"&&<a href="/admin">Admin</a>}{user?<span className="pill">Hi, {user.display_name} <button onClick={()=>{localStorage.removeItem('ecoscholar_token');localStorage.removeItem('ecoscholar_user');setUser(null);setRecommendations([])}}>Sign out</button></span>:<a className="primary" href="/login">Sign in / Join</a>}</header>
     <section className="hero"><div className="hero-copy"><div className="eyebrow">Knowledge for a changing planet</div><h1>Learn deeply.<br/>Live lightly.</h1><p>Build the knowledge to understand environmental challenges and make better-informed decisions. Explore practical lessons, ask evidence-led questions and track your learning journey.</p><a className="primary" href="#learning">Explore learning paths ↗</a></div><div className="visual"><div className="visual-label">A more informed relationship<br/>with our living planet.</div></div></section>
     <section className="stats"><div className="stat"><b>{courses.length || '—'}</b><small>Starter learning modules</small></div><div className="stat"><b>5</b><small>Environmental knowledge themes</small></div><div className="stat"><b>TF-IDF</b><small>Retrieval baseline</small></div></section>
     <section id="learning"><div className="section-head"><div><div className="eyebrow">Start with the fundamentals</div><h2>Learning paths</h2></div><span className="muted">Curated starter curriculum</span></div><div className="courses">{courses.map(c=><article className="course" key={c.slug}><div className="course-top"><span>{c.category.toUpperCase()}</span><span>{c.duration}</span></div><h3>{c.title}</h3><p>{c.description}</p><div className="course-bottom"><small className="muted">{c.level}</small><a href={`/course/${c.slug}`}>Open module ↗</a></div></article>)}</div></section>
