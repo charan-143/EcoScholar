@@ -24,6 +24,8 @@ Next.js frontend -> FastAPI REST API -> PostgreSQL
 3. Run `docker compose up --build`.
 4. Open http://localhost:3000 and API docs at http://localhost:8000/docs.
 
+Run backend checks with `PYTHONPATH=backend pytest -q backend/tests` and compile checks with `python -m compileall -q backend/app backend/api`.
+
 Frontend-only: `cd frontend && npm install && npm run dev`.
 Backend-only: create a Python virtual environment, install `backend/requirements.txt`, then run `uvicorn app.main:app --reload --app-dir backend` from the repository root.
 
@@ -36,6 +38,16 @@ Backend-only: create a Python virtual environment, install `backend/requirements
 - `POST /api/quizzes/submit` — body: `{"course_slug":"climate-basics","answers":[1,0,2]}`
 - `GET /api/progress`
 - `POST /api/footprint/estimate`
+
+## Deployment layout
+
+The repository is prepared for two Vercel projects linked to the same GitHub repository:
+- Frontend project root: `frontend` (Next.js).
+- API project root: `backend` (FastAPI Python Function via `backend/api/index.py`).
+
+Configure `NEXT_PUBLIC_API_URL` on the frontend project to the deployed API origin. Configure `DATABASE_URL` and `API_ALLOWED_ORIGINS` on the API project; use a managed PostgreSQL provider with a serverless-compatible connection string. Add the frontend's production and preview origins to `API_ALLOWED_ORIGINS`. The API's CORS configuration also permits Vercel preview hostnames. Do not use the local Docker database URL in production.
+
+A GitHub Actions workflow runs Python compile/tests and a Next.js production build on pushes and pull requests to `main`.
 
 ## AI/ML approach
 The assistant is a retrieval baseline, not a generative model. TF-IDF vectorization with unigram/bigram features ranks passages by cosine similarity. Retrieved excerpts and source notes are returned to the UI for inspection. This is a reproducible baseline for future comparison with embeddings, hybrid retrieval, reranking and citation-checked generation.
