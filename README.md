@@ -11,7 +11,7 @@ EcoScholar is a sustainability learning platform built with Next.js, FastAPI, Po
 - Optional server-side OpenAI LLM synthesis with source-label validation and evidence-only fallback.
 - Curated primary-source references: IPCC, UNEP, IEA, IPBES, FAO, World Bank and Our World in Data.
 - Dataset catalogue for emissions, electricity mix, primary energy, forests, freshwater and protected areas.
-- Personalized learning recommendations based on interests and recent quiz mastery.
+- Content-based TF-IDF recommendations blended with recent quiz mastery.
 - Offline Recall@k, MRR and nDCG evaluation plus local retrieval latency benchmarking.
 
 ## Local setup
