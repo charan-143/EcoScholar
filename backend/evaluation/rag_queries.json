@@ -1,0 +1,10 @@
+[
+ {"query":"What are the main human drivers of climate change?","relevant_ids":["ipcc-ar6-syr"]},
+ {"query":"How do countries adapt to climate impacts?","relevant_ids":["ipcc-ar6-syr","unep-emissions-gap-2024"]},
+ {"query":"What is the state of biodiversity and ecosystem services?","relevant_ids":["ipbes-global-assessment"]},
+ {"query":"What policies can reduce material consumption and waste?","relevant_ids":["unep-global-resources-outlook"]},
+ {"query":"How is the global energy system changing?","relevant_ids":["iea-world-energy-outlook"]},
+ {"query":"What data is available for national climate risk profiles?","relevant_ids":["world-bank-climate"]},
+ {"query":"How are global fisheries and aquaculture performing?","relevant_ids":["fao-sofia"]},
+ {"query":"How do greenhouse gas emissions compare between countries?","relevant_ids":["our-world-in-data-co2"]}
+]
