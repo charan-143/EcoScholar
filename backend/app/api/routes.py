@@ -5,7 +5,7 @@ from app.models.course import Course
 from app.models.progress import QuizAttempt
 from app.models.user import User
 from app.schemas.api import AskRequest, QuizRequest, FootprintRequest
-from app.api.auth import current_user
+from app.api.auth import current_user, optional_user
 from app.services.rag import hybrid_retrieve, answer_with_sources
 from app.services.recommendations import personalized_recommendations
 from app.data.source_catalog import get_source_catalog
@@ -36,13 +36,13 @@ def ask(payload:AskRequest):
  result["sources"]=[{"id":h["id"],"title":h["title"],"excerpt":h["text"],"source":h["source"],"url":h.get("url"),"relevance":h["relevance"]} for h in result["sources"]]
  return result
 @router.post("/quizzes/submit")
-def submit_quiz(payload:QuizRequest,db:Session=Depends(get_db)):
+def submit_quiz(payload:QuizRequest,db:Session=Depends(get_db),user:User|None=Depends(optional_user)):
  quiz=QUIZZES.get(payload.course_slug)
  if not quiz: raise HTTPException(404,"No quiz is available for this course yet")
  if len(payload.answers)!=len(quiz["answers"]): raise HTTPException(422,"Answer count does not match quiz")
  if any(a<0 or a>=len(opts) for a,opts in zip(payload.answers,quiz["options"])): raise HTTPException(422,"Answer option is out of range")
  score=sum(a==b for a,b in zip(payload.answers,quiz["answers"]))
- db.add(QuizAttempt(course_slug=payload.course_slug,score=score,total=len(quiz["answers"])))
+ db.add(QuizAttempt(learner_id=str(user.id) if user else "demo-learner",course_slug=payload.course_slug,score=score,total=len(quiz["answers"])))
  db.commit()
  return {"score":score,"total":len(quiz["answers"]),"percentage":round(score/len(quiz["answers"])*100),"message":"Review the explanations and retry to strengthen retention."}
 @router.get("/quizzes/{course_slug}")
