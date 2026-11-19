@@ -14,3 +14,11 @@ test("frontend API base URL is configurable",()=>{
   const source=readFileSync("app/login/page.tsx","utf8");
   assert.match(source,/NEXT_PUBLIC_API_URL/);
 });
+
+test("admin role management page calls protected role APIs",()=>{
+  const source=readFileSync("app/admin/page.tsx","utf8");
+  assert.match(source,/\/api\/auth\/users/);
+  assert.match(source,/PATCH/);
+  assert.match(source,/educator/);
+  assert.match(source,/admin/);
+});
