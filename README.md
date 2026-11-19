@@ -18,7 +18,7 @@ EcoScholar is a sustainability learning platform built with Next.js, FastAPI, Po
 1. Copy .env.example to .env and set a high-entropy JWT_SECRET_KEY.
 2. Run docker compose up --build.
 3. Frontend: http://localhost:3000; API docs: http://localhost:8000/docs.
-4. Backend tests: PYTHONPATH=backend pytest -q backend/tests.
+4. Apply schema: DATABASE_URL=postgresql+psycopg://... alembic upgrade head.\n5. Seed courses: PYTHONPATH=backend python backend/scripts/seed_courses.py.\n6. Backend tests: PYTHONPATH=backend pytest -q backend/tests.
 5. Retrieval quality: PYTHONPATH=backend python backend/evaluation/metrics.py.
 6. Local latency: PYTHONPATH=backend python backend/evaluation/benchmark.py.
 7. Frontend tests: cd frontend && npm test.
@@ -45,7 +45,7 @@ backend/app/data/environmental_sources.json records publishers and reports. back
 The public GitHub repository is configured for separate Vercel projects:
 - Frontend root: frontend; set NEXT_PUBLIC_API_URL to the API origin.
 - API root: backend; set DATABASE_URL, JWT_SECRET_KEY, API_ALLOWED_ORIGINS and optionally OPENAI_API_KEY / OPENAI_MODEL.
-- Use a managed PostgreSQL database and allow the frontend production origin in API_ALLOWED_ORIGINS.
+- Use a managed PostgreSQL database and allow the frontend production origin in API_ALLOWED_ORIGINS. Run alembic upgrade head and the course seed script once against the production DATABASE_URL before enabling traffic.
 - GitHub Actions runs backend compilation, backend tests, retrieval metrics, latency benchmarking, frontend smoke tests and a Next.js production build.
 
 ## Security and limitations
