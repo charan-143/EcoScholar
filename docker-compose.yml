@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ecoscholar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ecoscholar_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-ecoscholar}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecoscholar -d ecoscholar"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://ecoscholar:ecoscholar_dev@db:5432/ecoscholar}
+    ports: ["8000:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+  web:
+    build: ./frontend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports: ["3000:3000"]
+    depends_on: [api]
+volumes:
+  pgdata:
