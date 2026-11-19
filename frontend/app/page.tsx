@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 type Course = { slug:string; title:string; category:string; level:string; duration:string; description:string };
-type Source = { id:string; title:string; excerpt:string; source:string; relevance:number; url?:string };\ntype Recommendation = { course_slug:string; reason:string; score:number };
+type Source = { id:string; title:string; excerpt:string; source:string; relevance:number; url?:string };
+type Recommendation = { course_slug:string; reason:string; score:number };
 
 export default function Home() {
   const [courses,setCourses] = useState<Course[]>([]);
@@ -11,7 +12,9 @@ export default function Home() {
   const [answer,setAnswer] = useState('');
   const [sources,setSources] = useState<Source[]>([]);
   const [loading,setLoading] = useState(false);
-  const [apiState,setApiState] = useState('Connecting to API');\n  const [user,setUser] = useState<{display_name:string}|null>(null);\n  const [recommendations,setRecommendations] = useState<Recommendation[]>([]);
+  const [apiState,setApiState] = useState('Connecting to API');
+  const [user,setUser] = useState<{display_name:string}|null>(null);
+  const [recommendations,setRecommendations] = useState<Recommendation[]>([]);
   useEffect(() => {
     fetch(`${API}/api/courses`).then(r => { if(!r.ok) throw new Error('API unavailable'); return r.json(); })
       .then(d => { setCourses(d); setApiState('API connected'); }).catch(() => setApiState('API unavailable — start Docker Compose'));
